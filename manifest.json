@@ -1,8 +1,10 @@
 {
 "name": "LocalPad Text Editor",
 "short_name": "LocalPad",
+"id": "/localpad/",
 "start_url": "./index.html",
 "display": "standalone",
+"display_override": ["window-controls-overlay", "standalone"],
 "background_color": "#0f172a",
 "theme_color": "#1e3a8a",
 "description": "A fully local, fast, and secure code and text editor.",
