@@ -1,18 +1,18 @@
 {
-"name": "LocalPad Text Editor",
-"short_name": "LocalPad",
-"start_url": "./index.html",
-"display": "standalone",
-"display_override": ["window-controls-overlay", "standalone"],
-"background_color": "#0f172a",
-"theme_color": "#1e3a8a",
-"description": "A fully local, fast, and secure code and text editor.",
-"icons": [
-{
-"src": "./icon.png",
-"sizes": "512x512",
-"type": "image/png",
-"purpose": "any maskable"
-}
-]
+  "name": "LocalPad",
+  "short_name": "LocalPad",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "description": "A fully local, fast, and secure code and text editor.",
+  "icons": [
+    {
+      "src": "./icon.png",
+      "sizes": "1024x1024 512x512 192x192 any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
 }
