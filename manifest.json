@@ -1,7 +1,6 @@
 {
 "name": "LocalPad Text Editor",
 "short_name": "LocalPad",
-"id": "/localpad/",
 "start_url": "./index.html",
 "display": "standalone",
 "display_override": ["window-controls-overlay", "standalone"],
@@ -10,7 +9,7 @@
 "description": "A fully local, fast, and secure code and text editor.",
 "icons": [
 {
-"src": "https://cdn-icons-png.flaticon.com/512/2906/2906274.png",
+"src": "./icon.png",
 "sizes": "512x512",
 "type": "image/png",
 "purpose": "any maskable"
