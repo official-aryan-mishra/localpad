@@ -1,0 +1,17 @@
+{
+"name": "LocalPad Text Editor",
+"short_name": "LocalPad",
+"start_url": "./index.html",
+"display": "standalone",
+"background_color": "#0f172a",
+"theme_color": "#1e3a8a",
+"description": "A fully local, fast, and secure code and text editor.",
+"icons": [
+{
+"src": "https://cdn-icons-png.flaticon.com/512/2906/2906274.png",
+"sizes": "512x512",
+"type": "image/png",
+"purpose": "any maskable"
+}
+]
+}

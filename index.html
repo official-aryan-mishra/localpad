@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light-white">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LocalPad - Syntax Highlighting Editor</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366f1',
+                        primary_hover: '#4f46e5',
+                        theme_bg: 'var(--bg)',
+                        theme_text: 'var(--text)',
+                        theme_toolbar: 'var(--toolbar)',
+                        theme_border: 'var(--border)',
+                        theme_hover: 'var(--hover)',
+                        theme_input: 'var(--input-bg)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- PrismJS Core + Languages -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+
+    <style>
+        /* Theme Variables */
+        :root, [data-theme="light-white"] {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --toolbar: #f8fafc;
+            --border: #e2e8f0;
+            --hover: #f1f5f9;
+            --input-bg: #ffffff;
+            /* Prism Light Syntax */
+            --prism-keyword: #0000ff;
+            --prism-string: #a31515;
+            --prism-number: #098658;
+            --prism-comment: #008000;
+            --prism-function: #795e26;
+        }
+        [data-theme="light-blue"] {
+            --bg: #f0f9ff;
+            --text: #0c4a6e;
+            --toolbar: #e0f2fe;
+            --border: #bae6fd;
+            --hover: #bae6fd;
+            --input-bg: #ffffff;
+            /* Prism Light Syntax */
+            --prism-keyword: #0284c7;
+            --prism-string: #b91c1c;
+            --prism-number: #047857;
+            --prism-comment: #15803d;
+            --prism-function: #b45309;
+        }
+        [data-theme="dark-black"] {
+            --bg: #000000;
+            --text: #f3f4f6;
+            --toolbar: #111111;
+            --border: #262626;
+            --hover: #1f1f1f;
+            --input-bg: #111111;
+            /* Prism Dark Syntax */
+            --prism-keyword: #569cd6;
+            --prism-string: #ce9178;
+            --prism-number: #b5cea8;
+            --prism-comment: #6a9955;
+            --prism-function: #dcdcaa;
+        }
+        [data-theme="dark-blue"] {
+            --bg: #0f172a; 
+            --text: #e0e7ff;
+            --toolbar: #1e3a8a; 
+            --border: #312e81;
+            --hover: #3730a3;
+            --input-bg: #1e3a8a;
+            /* Prism Dark Syntax */
+            --prism-keyword: #60a5fa;
+            --prism-string: #fca5a5;
+            --prism-number: #6ee7b7;
+            --prism-comment: #4ade80;
+            --prism-function: #fde047;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text); opacity: 0.5; }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Editor synchronization essentials */
+        .editor-workspace {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #line-numbers {
+            box-sizing: border-box;
+            padding: 1rem 0.25rem 1rem 0.5rem;
+            text-align: right;
+            user-select: none;
+            overflow: hidden;
+            min-width: 2.5rem;
+            font-family: 'Courier New', Courier, monospace;
+            border-right-width: 1px;
+            opacity: 0.7;
+        }
+
+        /* OVERLAY EDITOR ARCHITECTURE */
+        #editor-container {
+            position: relative;
+            flex: 1;
+            overflow: hidden;
+            background: transparent;
+        }
+
+        #editor, #syntax-pre {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 1rem;
+            box-sizing: border-box;
+            border: none;
+            font-family: 'Courier New', Courier, monospace;
+            tab-size: 4;
+            -moz-tab-size: 4;
+        }
+
+        #editor {
+            color: transparent; 
+            background: transparent;
+            caret-color: var(--text); /* Keep cursor visible */
+            z-index: 2;
+            resize: none;
+            outline: none;
+            overflow: auto;
+        }
+
+        #syntax-pre {
+            z-index: 1;
+            pointer-events: none;
+            overflow: hidden; /* Scroll is controlled by JS syncing with #editor */
+            color: var(--text); /* Base text color for unhighlighted bits */
+        }
+
+        /* Make native text selection highlight visible but keep text transparent */
+        #editor::selection {
+            background-color: rgba(99, 102, 241, 0.4);
+            color: transparent;
+        }
+
+        /* Word Wrap Control Classes */
+        .wrap-enabled {
+            white-space: pre-wrap !important;
+            word-break: break-word !important;
+            overflow-wrap: break-word !important;
+        }
+        .wrap-disabled {
+            white-space: pre !important;
+            word-break: normal !important;
+            overflow-wrap: normal !important;
+        }
+
+        /* Dynamic PrismJS Theme Tokens */
+        .token.comment, .token.prolog, .token.doctype, .token.cdata { color: var(--prism-comment); }
+        .token.punctuation { color: var(--text); opacity: 0.7; }
+        .token.property, .token.tag, .token.boolean, .token.number, .token.constant, .token.symbol, .token.deleted { color: var(--prism-number); }
+        .token.selector, .token.attr-name, .token.string, .token.char, .token.builtin, .token.inserted { color: var(--prism-string); }
+        .token.operator, .token.entity, .token.url { color: var(--text); }
+        .token.atrule, .token.attr-value, .token.keyword { color: var(--prism-keyword); }
+        .token.function, .token.class-name { color: var(--prism-function); }
+        .token.regex, .token.important, .token.variable { color: var(--prism-keyword); }
+
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .modal-animate { animation: fadeIn 0.2s ease-out forwards; }
+        @keyframes slideInUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .toast-animate { animation: slideInUp 0.3s ease-out forwards; }
+        
+        /* Custom toggle switch CSS mapping */
+        input:checked ~ .toggle-bg { background-color: #4f46e5; }
+        input:checked ~ .toggle-dot { transform: translateX(100%); }
+    </style>
+</head>
+<body class="bg-theme_bg text-theme_text h-screen w-screen flex flex-col overflow-hidden transition-colors duration-200 font-sans">
+
+    <!-- Top Toolbar -->
+    <header class="h-14 md:h-16 flex-shrink-0 border-b border-theme_border bg-theme_toolbar flex items-center justify-between px-2 md:px-4 z-20 transition-colors duration-200 relative">
+        
+        <div class="flex items-center space-x-1 md:space-x-3">
+            <button onclick="app.toggleTabs()" class="p-2 rounded-lg hover:bg-theme_hover text-theme_text transition focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+            <h1 class="text-lg font-bold hidden sm:block mr-2">LocalPad</h1>
+
+            <!-- Open / Save Controls -->
+            <button onclick="app.handleFileOpenClick()" class="flex items-center space-x-1 px-3 py-1.5 md:py-2 bg-theme_hover hover:opacity-80 rounded-lg transition text-sm font-medium focus:outline-none">
+                <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"></path></svg>
+                <span class="hidden lg:inline">Open</span>
+            </button>
+            <input type="file" id="file-input" class="hidden" accept=".txt,.py,.sh,.js,.html,.json" onchange="app.handleFileFallback(event)">
+
+            <button onclick="app.saveFile()" class="flex items-center space-x-1 px-3 py-1.5 md:py-2 bg-primary hover:bg-primary_hover text-white rounded-lg transition text-sm font-medium shadow-sm focus:outline-none">
+                <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                <span class="hidden lg:inline">Save</span>
+            </button>
+        </div>
+
+        <!-- Active File Display (Center) -->
+        <div class="absolute left-1/2 transform -translate-x-1/2 hidden md:flex items-center justify-center pointer-events-none truncate px-4 w-48 justify-center">
+            <span id="active-file-display" class="text-sm font-semibold opacity-80 truncate text-theme_text">untitled.txt</span>
+        </div>
+
+        <div class="flex items-center space-x-1 md:space-x-2">
+            <!-- Undo / Redo -->
+            <div class="flex items-center border-r border-theme_border pr-1 md:pr-2 mr-1 md:mr-2">
+                <button onclick="app.undo()" class="p-2 hover:bg-theme_hover rounded-lg transition focus:outline-none" title="Undo (Ctrl+Z)">
+                    <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
+                </button>
+                <button onclick="app.redo()" class="p-2 hover:bg-theme_hover rounded-lg transition focus:outline-none" title="Redo (Ctrl+Y)">
+                    <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6"></path></svg>
+                </button>
+            </div>
+
+            <!-- Find & Replace Button -->
+            <button onclick="app.toggleFindReplace()" class="p-2 hover:bg-theme_hover rounded-lg transition focus:outline-none" title="Find and Replace">
+                <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </button>
+
+            <!-- Font Size Controls -->
+            <div class="flex items-center space-x-1 bg-theme_hover p-1 rounded-lg">
+                <button onclick="app.changeFontSize(-2)" class="p-1 hover:bg-theme_bg rounded transition focus:outline-none" title="Decrease Font">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
+                </button>
+                <span id="font-size-display" class="text-sm font-mono font-medium w-6 text-center">16</span>
+                <button onclick="app.changeFontSize(2)" class="p-1 hover:bg-theme_bg rounded transition focus:outline-none" title="Increase Font">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                </button>
+            </div>
+
+            <!-- Settings Button -->
+            <button onclick="app.toggleSettings()" class="p-2 hover:bg-theme_hover rounded-lg transition focus:outline-none" title="Settings">
+                <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace Area -->
+    <div id="workspace-container" class="flex flex-1 overflow-hidden relative">
+        
+        <!-- Sidebar Overlay (Mobile) -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden" onclick="app.toggleTabs()"></div>
+
+        <!-- Adaptive Tab Bar -->
+        <nav id="tabs-container" class="
+            fixed md:static inset-y-0 left-0 z-40 
+            w-64 max-h-screen md:max-h-auto
+            bg-theme_toolbar border-r border-theme_border
+            transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out
+            flex flex-col flex-shrink-0
+        ">
+            <!-- Mobile Header for Drawer -->
+            <div class="p-4 flex items-center justify-between border-b border-theme_border md:hidden sticky top-0 bg-theme_toolbar z-10 flex-shrink-0">
+                <h2 class="font-semibold text-lg">Open Files</h2>
+                <button onclick="app.toggleTabs()" class="p-2 hover:bg-theme_hover rounded-full focus:outline-none">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Fixed + New Tab Container -->
+            <div id="new-tab-container" class="flex-shrink-0 flex border-b md:border-b-0 border-theme_border bg-theme_toolbar z-10 md:min-w-[48px]">
+                <button onclick="app.addTab()" class="flex items-center justify-center w-full h-full min-h-[48px] hover:bg-theme_hover text-theme_text opacity-80 hover:opacity-100 focus:outline-none transition cursor-pointer" title="New Tab">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    <span class="md:hidden ml-2 font-medium text-sm">New Tab</span>
+                </button>
+            </div>
+
+            <ul id="tabs-list" class="flex flex-col flex-1 overflow-y-auto no-scrollbar p-2 md:p-1 space-y-1">
+                <!-- JS Inject -->
+            </ul>
+        </nav>
+
+        <!-- Editor Content -->
+        <main class="flex-1 flex flex-col min-w-0 bg-theme_bg relative">
+            <div class="editor-workspace">
+                
+                <!-- Find & Replace Floating Panel -->
+                <div id="find-replace-panel" class="hidden absolute top-2 right-2 md:right-6 bg-theme_toolbar border border-theme_border p-3 rounded-lg shadow-2xl z-20 w-72 flex flex-col space-y-3">
+                    <div class="flex items-center space-x-2">
+                        <input type="text" id="find-input" placeholder="Find..." class="flex-1 bg-theme_bg border border-theme_border text-theme_text p-2 rounded-md outline-none focus:border-primary text-sm placeholder:text-theme_text placeholder:opacity-70">
+                        <button onclick="app.findNext()" class="px-3 py-2 bg-theme_border hover:opacity-80 rounded-md text-sm font-medium transition text-theme_text">Next</button>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <input type="text" id="replace-input" placeholder="Replace with..." class="flex-1 bg-theme_bg border border-theme_border text-theme_text p-2 rounded-md outline-none focus:border-primary text-sm placeholder:text-theme_text placeholder:opacity-70">
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="space-x-1">
+                            <button onclick="app.replace()" class="px-3 py-2 bg-theme_border hover:opacity-80 rounded-md text-sm font-medium transition text-theme_text">Replace</button>
+                            <button onclick="app.replaceAll()" class="px-3 py-2 bg-theme_border hover:opacity-80 rounded-md text-sm font-medium transition text-theme_text">All</button>
+                        </div>
+                        <button onclick="app.toggleFindReplace()" class="text-xs text-red-500 hover:text-red-600 font-bold px-2 py-1">Close</button>
+                    </div>
+                    <div id="find-msg" class="text-xs opacity-70 hidden text-theme_text"></div>
+                </div>
+
+                <!-- Line Numbers -->
+                <div id="line-numbers" class="bg-theme_toolbar border-theme_border text-theme_text">1</div>
+                
+                <!-- Overlay Editor Container -->
+                <div id="editor-container">
+                    <pre id="syntax-pre" aria-hidden="true"><code id="syntax-code" class="language-none"></code></pre>
+                    <textarea 
+                        id="editor" 
+                        spellcheck="false" 
+                        oninput="app.onEditorInput()" 
+                        onscroll="app.syncScroll()" 
+                        onkeydown="app.handleKeyDown(event)"
+                        placeholder="Start typing..."></textarea>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center modal-animate">
+        <div class="bg-theme_bg w-11/12 max-w-sm rounded-xl shadow-2xl overflow-hidden border border-theme_border">
+            <div class="px-5 py-4 border-b border-theme_border flex justify-between items-center bg-theme_toolbar">
+                <h3 class="font-bold text-lg text-theme_text">Settings</h3>
+                <button onclick="app.toggleSettings()" class="text-theme_text opacity-70 hover:opacity-100 focus:outline-none">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="p-5 space-y-5">
+                
+                <label class="flex items-center justify-between cursor-pointer">
+                    <span class="font-medium text-theme_text">Show Line Numbers</span>
+                    <div class="relative">
+                        <input type="checkbox" id="setting-line-numbers" class="sr-only" onchange="app.updateSettings()">
+                        <div class="w-10 h-6 bg-slate-300 dark:bg-slate-600 rounded-full shadow-inner transition-colors duration-200 toggle-bg"></div>
+                        <div class="absolute w-4 h-4 bg-white rounded-full shadow inset-y-1 left-1 transition-transform duration-200 toggle-dot"></div>
+                    </div>
+                </label>
+
+                <label class="flex items-center justify-between cursor-pointer">
+                    <span class="font-medium text-theme_text">Word Wrap</span>
+                    <div class="relative">
+                        <input type="checkbox" id="setting-word-wrap" class="sr-only" onchange="app.updateSettings()">
+                        <div class="w-10 h-6 bg-slate-300 dark:bg-slate-600 rounded-full shadow-inner transition-colors duration-200 toggle-bg"></div>
+                        <div class="absolute w-4 h-4 bg-white rounded-full shadow inset-y-1 left-1 transition-transform duration-200 toggle-dot"></div>
+                    </div>
+                </label>
+
+                <div class="flex flex-col space-y-2">
+                    <label class="font-medium text-theme_text">Theme</label>
+                    <select id="setting-theme" class="bg-theme_input border border-theme_border text-theme_text text-sm rounded-lg block w-full p-2.5 outline-none focus:ring-2 focus:ring-primary" onchange="app.updateSettings()">
+                        <option value="light-blue">Light-Blue</option>
+                        <option value="light-white">Light-White</option>
+                        <option value="dark-black">Dark-Black</option>
+                        <option value="dark-blue">Dark-Blue</option>
+                    </select>
+                </div>
+
+                <div class="hidden md:flex flex-col space-y-2">
+                    <label class="font-medium text-theme_text">Desktop Tab Layout</label>
+                    <select id="setting-tab-layout" class="bg-theme_input border border-theme_border text-theme_text text-sm rounded-lg block w-full p-2.5 outline-none focus:ring-2 focus:ring-primary" onchange="app.updateSettings()">
+                        <option value="horizontal">Horizontal (Top)</option>
+                        <option value="vertical">Vertical (Left)</option>
+                    </select>
+                </div>
+
+                <div class="pt-4 border-t border-theme_border flex justify-center">
+                    <button onclick="app.showShortcuts()" class="text-primary hover:opacity-80 font-medium text-sm transition focus:outline-none flex items-center space-x-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                        <span>View Keyboard Shortcuts</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shortcuts Modal -->
+    <div id="shortcuts-modal" class="fixed inset-0 bg-black/50 z-[60] hidden flex items-center justify-center modal-animate">
+        <div class="bg-theme_bg w-11/12 max-w-sm rounded-xl shadow-2xl overflow-hidden border border-theme_border">
+            <div class="px-5 py-4 border-b border-theme_border flex justify-between items-center bg-theme_toolbar">
+                <h3 class="font-bold text-lg text-theme_text">Keyboard Shortcuts</h3>
+                <button onclick="app.hideShortcuts()" class="text-theme_text opacity-70 hover:opacity-100 focus:outline-none">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="p-5 space-y-3">
+                <div class="flex justify-between border-b border-theme_border pb-2"><span class="text-theme_text opacity-80">Save File</span><kbd class="bg-theme_hover px-2 py-1 rounded text-xs font-mono border border-theme_border">Ctrl + S</kbd></div>
+                <div class="flex justify-between border-b border-theme_border pb-2"><span class="text-theme_text opacity-80">Open File</span><kbd class="bg-theme_hover px-2 py-1 rounded text-xs font-mono border border-theme_border">Ctrl + O</kbd></div>
+                <div class="flex justify-between border-b border-theme_border pb-2"><span class="text-theme_text opacity-80">Find / Replace</span><kbd class="bg-theme_hover px-2 py-1 rounded text-xs font-mono border border-theme_border">Ctrl + F</kbd></div>
+                <div class="flex justify-between border-b border-theme_border pb-2"><span class="text-theme_text opacity-80">New Tab</span><kbd class="bg-theme_hover px-2 py-1 rounded text-xs font-mono border border-theme_border">Alt + N</kbd></div>
+                <div class="flex justify-between border-b border-theme_border pb-2"><span class="text-theme_text opacity-80">Close Tab</span><kbd class="bg-theme_hover px-2 py-1 rounded text-xs font-mono border border-theme_border">Alt + W</kbd></div>
+                <div class="flex justify-between border-b border-theme_border pb-2"><span class="text-theme_text opacity-80">Undo</span><kbd class="bg-theme_hover px-2 py-1 rounded text-xs font-mono border border-theme_border">Ctrl + Z</kbd></div>
+                <div class="flex justify-between border-b border-theme_border pb-2"><span class="text-theme_text opacity-80">Redo</span><kbd class="bg-theme_hover px-2 py-1 rounded text-xs font-mono border border-theme_border">Ctrl + Y</kbd></div>
+                <div class="flex justify-between"><span class="text-theme_text opacity-80">Indent Code</span><kbd class="bg-theme_hover px-2 py-1 rounded text-xs font-mono border border-theme_border">Tab</kbd></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
+
+    <script>
+        const app = {
+            tabs: [],
+            activeTabId: null,
+            lineHeight: 1.5,
+            
+            settings: {
+                showLineNumbers: true,
+                wordWrap: false,
+                theme: 'dark-blue', // Defaulted for syntax highlighting demo
+                fontSize: 16,
+                tabLayout: 'horizontal'
+            },
+            
+            elements: {
+                workspaceContainer: document.getElementById('workspace-container'),
+                tabsContainer: document.getElementById('tabs-container'),
+                sidebarOverlay: document.getElementById('sidebar-overlay'),
+                tabsList: document.getElementById('tabs-list'),
+                editor: document.getElementById('editor'),
+                syntaxPre: document.getElementById('syntax-pre'),
+                syntaxCode: document.getElementById('syntax-code'),
+                lineNumbers: document.getElementById('line-numbers'),
+                fontSizeDisplay: document.getElementById('font-size-display'),
+                settingsModal: document.getElementById('settings-modal'),
+                shortcutsModal: document.getElementById('shortcuts-modal'),
+                toastContainer: document.getElementById('toast-container'),
+                activeFileDisplay: document.getElementById('active-file-display'),
+                
+                // Settings Inputs
+                toggleLineNum: document.getElementById('setting-line-numbers'),
+                toggleWordWrap: document.getElementById('setting-word-wrap'),
+                selectTheme: document.getElementById('setting-theme'),
+                selectTabLayout: document.getElementById('setting-tab-layout'),
+
+                // Find & Replace
+                findPanel: document.getElementById('find-replace-panel'),
+                findInput: document.getElementById('find-input'),
+                replaceInput: document.getElementById('replace-input'),
+                findMsg: document.getElementById('find-msg')
+            },
+
+            init() {
+                this.loadSettings();
+                this.addTab('untitled.txt', '');
+                this.applySettingsToUI();
+                
+                // Keep editor focused when interacting with find modal buttons
+                this.elements.findPanel.addEventListener('mousedown', (e) => {
+                    if(e.target.tagName !== 'INPUT') e.preventDefault();
+                });
+
+                // Global Keyboard Shortcuts
+                window.addEventListener('keydown', (e) => this.handleGlobalKeyDown(e));
+            },
+
+            // --- Syntax Highlighting Logic ---
+            detectLanguage(filename) {
+                const ext = filename.split('.').pop().toLowerCase();
+                const map = {
+                    'py': 'python',
+                    'sh': 'bash',
+                    'js': 'javascript',
+                    'html': 'markup', // Prism uses markup for HTML
+                    'json': 'json',
+                    'txt': 'none'
+                };
+                return map[ext] || 'none';
+            },
+
+            updateSyntaxHighlighting() {
+                const activeTab = this.tabs.find(t => t.id === this.activeTabId);
+                if (!activeTab) return;
+
+                const text = this.elements.editor.value;
+                const lang = this.detectLanguage(activeTab.name);
+                
+                // Update code block content and language class
+                this.elements.syntaxCode.className = `language-${lang}`;
+                
+                // Escape HTML to prevent injection before highlighting
+                this.elements.syntaxCode.textContent = text;
+                
+                // Trigger Prism to highlight
+                if (Prism.languages[lang]) {
+                    Prism.highlightElement(this.elements.syntaxCode);
+                }
+            },
+
+            // Tab support for Textarea
+            handleKeyDown(e) {
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    const start = this.elements.editor.selectionStart;
+                    const end = this.elements.editor.selectionEnd;
+                    const val = this.elements.editor.value;
+                    
+                    // Insert 4 spaces
+                    this.elements.editor.value = val.substring(0, start) + "    " + val.substring(end);
+                    this.elements.editor.selectionStart = this.elements.editor.selectionEnd = start + 4;
+                    this.onEditorInput();
+                }
+            },
+
+            // --- State & Settings Management ---
+            loadSettings() {
+                const saved = localStorage.getItem('localpad_settings');
+                if (saved) {
+                    try { this.settings = { ...this.settings, ...JSON.parse(saved) }; } 
+                    catch (e) { console.error(e); }
+                }
+            },
+            saveSettings() {
+                localStorage.setItem('localpad_settings', JSON.stringify(this.settings));
+            },
+            updateSettings() {
+                this.settings.showLineNumbers = this.elements.toggleLineNum.checked;
+                this.settings.wordWrap = this.elements.toggleWordWrap.checked;
+                this.settings.theme = this.elements.selectTheme.value;
+                this.settings.tabLayout = this.elements.selectTabLayout.value;
+                this.saveSettings();
+                this.applySettingsToUI();
+            },
+            applySettingsToUI() {
+                this.elements.toggleLineNum.checked = this.settings.showLineNumbers;
+                this.elements.toggleWordWrap.checked = this.settings.wordWrap;
+                this.elements.selectTheme.value = this.settings.theme;
+                this.elements.selectTabLayout.value = this.settings.tabLayout;
+
+                document.documentElement.setAttribute('data-theme', this.settings.theme);
+
+                this.elements.fontSizeDisplay.textContent = this.settings.fontSize;
+                const fontStr = `${this.settings.fontSize}px`;
+                
+                // Apply exactly identical font styling to both textarea and pre
+                [this.elements.editor, this.elements.syntaxPre].forEach(el => {
+                    el.style.fontSize = fontStr;
+                    el.style.lineHeight = this.lineHeight;
+                    
+                    if (this.settings.wordWrap) {
+                        el.classList.add('wrap-enabled');
+                        el.classList.remove('wrap-disabled');
+                    } else {
+                        el.classList.add('wrap-disabled');
+                        el.classList.remove('wrap-enabled');
+                    }
+                });
+
+                this.elements.lineNumbers.style.fontSize = fontStr;
+                this.elements.lineNumbers.style.lineHeight = this.lineHeight;
+
+                if (this.settings.showLineNumbers) {
+                    this.elements.lineNumbers.style.display = 'block';
+                    this.updateLineNumbers();
+                } else {
+                    this.elements.lineNumbers.style.display = 'none';
+                }
+
+                this.applyLayout();
+            },
+            applyLayout() {
+                const workspace = this.elements.workspaceContainer;
+                const tabs = this.elements.tabsContainer;
+                const tabsList = this.elements.tabsList;
+                const newTabContainer = document.getElementById('new-tab-container');
+                
+                // Remove existing desktop layout classes to reset
+                workspace.classList.remove('md:flex-col', 'md:flex-row');
+                tabs.classList.remove('md:w-full', 'md:h-12', 'md:flex-row', 'md:border-b', 'md:border-r-0', 'md:w-64', 'md:h-full', 'md:flex-col', 'md:border-r', 'md:border-b-0');
+                tabsList.classList.remove('md:flex-row', 'md:flex-col', 'md:overflow-x-auto', 'md:overflow-y-auto', 'md:space-x-1', 'md:space-y-0');
+                if (newTabContainer) newTabContainer.classList.remove('md:border-r', 'md:border-b', 'md:border-b-0');
+                
+                if (this.settings.tabLayout === 'vertical') {
+                    workspace.classList.add('md:flex-row');
+                    tabs.classList.add('md:w-64', 'md:h-full', 'md:flex-col', 'md:border-r', 'md:border-b-0');
+                    tabsList.classList.add('md:flex-col', 'md:overflow-y-auto');
+                    if (newTabContainer) newTabContainer.classList.add('md:border-b');
+                } else {
+                    workspace.classList.add('md:flex-col');
+                    tabs.classList.add('md:w-full', 'md:h-12', 'md:flex-row', 'md:border-b', 'md:border-r-0');
+                    tabsList.classList.add('md:flex-row', 'md:overflow-x-auto', 'md:space-x-1', 'md:space-y-0');
+                    if (newTabContainer) newTabContainer.classList.add('md:border-r', 'md:border-b-0');
+                }
+            },
+            toggleSettings() {
+                this.elements.settingsModal.classList.toggle('hidden');
+            },
+            changeFontSize(delta) {
+                this.settings.fontSize = Math.max(10, Math.min(48, this.settings.fontSize + delta));
+                this.saveSettings();
+                this.applySettingsToUI();
+            },
+
+            // --- Find & Replace Logic ---
+            toggleFindReplace() {
+                const p = this.elements.findPanel;
+                if (p.classList.contains('hidden')) {
+                    p.classList.remove('hidden');
+                    this.elements.findInput.focus();
+                    this.elements.findMsg.classList.add('hidden');
+                } else {
+                    p.classList.add('hidden');
+                    this.elements.editor.focus();
+                }
+            },
+            findNext() {
+                const text = this.elements.editor.value.toLowerCase();
+                const search = this.elements.findInput.value.toLowerCase();
+                if (!search) return;
+
+                let startPos = this.elements.editor.selectionEnd;
+                let idx = text.indexOf(search, startPos);
+                
+                if (idx === -1) idx = text.indexOf(search, 0);
+
+                if (idx !== -1) {
+                    this.elements.editor.focus();
+                    this.elements.editor.setSelectionRange(idx, idx + search.length);
+                    this.elements.findMsg.classList.add('hidden');
+                } else {
+                    this.elements.findMsg.textContent = "No matches found.";
+                    this.elements.findMsg.classList.remove('hidden');
+                }
+            },
+            replace() {
+                const search = this.elements.findInput.value;
+                const replaceStr = this.elements.replaceInput.value;
+                if (!search) return;
+
+                const start = this.elements.editor.selectionStart;
+                const end = this.elements.editor.selectionEnd;
+                const selectedText = this.elements.editor.value.substring(start, end);
+
+                if (selectedText.toLowerCase() === search.toLowerCase()) {
+                    this.elements.editor.setRangeText(replaceStr, start, end, 'end');
+                    this.onEditorInput(); 
+                }
+                this.findNext();
+            },
+            replaceAll() {
+                const search = this.elements.findInput.value;
+                const replaceStr = this.elements.replaceInput.value;
+                if (!search) return;
+
+                const regex = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+                const oldText = this.elements.editor.value;
+                const newText = oldText.replace(regex, replaceStr);
+
+                if (oldText !== newText) {
+                    this.elements.editor.value = newText;
+                    this.onEditorInput();
+                    this.showToast('Replaced all occurrences', 'success');
+                }
+            },
+
+            // --- Mobile and Desktop Sidebar/Tabs Management ---
+            toggleTabs() {
+                const container = this.elements.tabsContainer;
+                const overlay = this.elements.sidebarOverlay;
+                
+                if (window.innerWidth < 768) {
+                    if (container.classList.contains('-translate-x-full')) {
+                        container.classList.remove('-translate-x-full');
+                        overlay.classList.remove('hidden');
+                    } else {
+                        container.classList.add('-translate-x-full');
+                        overlay.classList.add('hidden');
+                    }
+                } else {
+                    container.classList.toggle('md:hidden');
+                }
+            },
+
+            // --- Tab Management ---
+            generateId() { return '_' + Math.random().toString(36).substr(2, 9); },
+            addTab(name = 'untitled.txt', content = '') {
+                const newTab = { id: this.generateId(), name: name, content: content, fileHandle: null };
+                this.tabs.push(newTab);
+                this.switchTab(newTab.id);
+            },
+            switchTab(id) {
+                if (this.activeTabId) {
+                    const currentTab = this.tabs.find(t => t.id === this.activeTabId);
+                    if (currentTab) currentTab.content = this.elements.editor.value;
+                }
+                this.activeTabId = id;
+                const activeTab = this.tabs.find(t => t.id === id);
+                if (activeTab) {
+                    this.elements.editor.value = activeTab.content;
+                    if (this.elements.activeFileDisplay) this.elements.activeFileDisplay.textContent = activeTab.name;
+                    this.renderTabs();
+                    this.updateSyntaxHighlighting();
+                    if (this.settings.showLineNumbers) this.updateLineNumbers();
+                }
+                if (window.innerWidth < 768 && !this.elements.tabsContainer.classList.contains('-translate-x-full')) {
+                    this.toggleTabs();
+                }
+            },
+            closeTab(id, event) {
+                event.stopPropagation();
+                const index = this.tabs.findIndex(t => t.id === id);
+                if (index === -1) return;
+                this.tabs.splice(index, 1);
+                if (this.tabs.length === 0) {
+                    this.addTab();
+                } else if (this.activeTabId === id) {
+                    const newActiveIndex = Math.max(0, index - 1);
+                    this.switchTab(this.tabs[newActiveIndex].id);
+                } else {
+                    this.renderTabs();
+                }
+            },
+            renderTabs() {
+                this.elements.tabsList.innerHTML = '';
+                this.tabs.forEach(tab => {
+                    const isActive = tab.id === this.activeTabId;
+                    const li = document.createElement('li');
+                    
+                    const baseClass = "group flex items-center justify-between px-3 py-2 cursor-pointer transition-colors duration-150 rounded-lg flex-shrink-0";
+                    const activeClass = isActive 
+                        ? "bg-theme_bg text-primary shadow-sm font-medium border border-theme_border" 
+                        : "bg-transparent hover:bg-theme_hover text-theme_text border border-transparent opacity-80 hover:opacity-100";
+
+                    li.className = `${baseClass} ${activeClass}`;
+                    li.onclick = () => this.switchTab(tab.id);
+
+                    li.innerHTML = `
+                        <div class="flex items-center space-x-2 truncate w-32 md:w-40 lg:w-48">
+                            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <span class="truncate text-sm">${tab.name}</span>
+                        </div>
+                        <button onclick="app.closeTab('${tab.id}', event)" class="ml-1 p-1 rounded-md hover:bg-theme_hover text-theme_text transition opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:outline-none">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    `;
+                    this.elements.tabsList.appendChild(li);
+                });
+            },
+
+            // --- Editor Mechanics ---
+            undo() {
+                this.elements.editor.focus();
+                document.execCommand('undo');
+            },
+            redo() {
+                this.elements.editor.focus();
+                document.execCommand('redo');
+            },
+            showShortcuts() {
+                this.elements.settingsModal.classList.add('hidden');
+                this.elements.shortcutsModal.classList.remove('hidden');
+            },
+            hideShortcuts() {
+                this.elements.shortcutsModal.classList.add('hidden');
+                this.elements.settingsModal.classList.remove('hidden');
+            },
+            handleGlobalKeyDown(e) {
+                // Ctrl / Cmd shortcuts
+                if (e.ctrlKey || e.metaKey) {
+                    const key = e.key.toLowerCase();
+                    if (key === 's') { e.preventDefault(); this.saveFile(); }
+                    if (key === 'o') { e.preventDefault(); this.handleFileOpenClick(); }
+                    if (key === 'f') { e.preventDefault(); this.toggleFindReplace(); }
+                }
+                // Alt shortcuts
+                if (e.altKey) {
+                    const key = e.key.toLowerCase();
+                    if (key === 'n') { e.preventDefault(); this.addTab(); }
+                    if (key === 'w') { 
+                        e.preventDefault(); 
+                        if (this.activeTabId) this.closeTab(this.activeTabId, null); 
+                    }
+                }
+            },
+            
+            onEditorInput() {
+                const activeTab = this.tabs.find(t => t.id === this.activeTabId);
+                if (activeTab) activeTab.content = this.elements.editor.value;
+                
+                this.updateSyntaxHighlighting();
+                if (this.settings.showLineNumbers) this.updateLineNumbers();
+            },
+            updateLineNumbers() {
+                const text = this.elements.editor.value;
+                const lines = text.split('\n').length;
+                const linesArray = Array.from({length: lines}, (_, i) => i + 1);
+                this.elements.lineNumbers.innerHTML = linesArray.join('<br>');
+            },
+            syncScroll() {
+                // Sync the scrolling perfectly between the transparent textarea, line numbers, and the code overlay block.
+                const scrollTop = this.elements.editor.scrollTop;
+                const scrollLeft = this.elements.editor.scrollLeft;
+
+                if (this.settings.showLineNumbers) {
+                    this.elements.lineNumbers.scrollTop = scrollTop;
+                }
+                
+                this.elements.syntaxPre.scrollTop = scrollTop;
+                this.elements.syntaxPre.scrollLeft = scrollLeft;
+            },
+
+            // --- File System Management ---
+            async handleFileOpenClick() {
+                if (window.showOpenFilePicker) {
+                    try {
+                        const [fileHandle] = await window.showOpenFilePicker({
+                            types: [{ 
+                                description: 'Code & Text Files', 
+                                accept: { 
+                                    'text/plain': ['.txt'],
+                                    'text/x-python': ['.py'],
+                                    'application/x-sh': ['.sh'],
+                                    'text/javascript': ['.js'],
+                                    'text/html': ['.html'],
+                                    'application/json': ['.json']
+                                } 
+                            }],
+                        });
+                        const file = await fileHandle.getFile();
+                        const text = await file.text();
+                        this.addTab(file.name, text);
+                        const tab = this.tabs[this.tabs.length - 1];
+                        tab.fileHandle = fileHandle;
+                        this.showToast(`Opened ${file.name}`, 'success');
+                    } catch (error) {
+                        if (error.name !== 'AbortError') this.showToast('Error opening file', 'error');
+                    }
+                } else {
+                    document.getElementById('file-input').click();
+                }
+            },
+            closeTab(id, event = null) {
+                if (event) event.stopPropagation();
+                const index = this.tabs.findIndex(t => t.id === id);
+                if (index === -1) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.addTab(file.name, e.target.result);
+                    this.showToast(`Opened ${file.name}`, 'success');
+                };
+                reader.onerror = () => this.showToast('Error reading file', 'error');
+                reader.readAsText(file);
+                event.target.value = '';
+            },
+            async saveFile() {
+                if (!this.activeTabId) return;
+                const activeTab = this.tabs.find(t => t.id === this.activeTabId);
+                if (!activeTab) return;
+                activeTab.content = this.elements.editor.value;
+
+                try {
+                    if (window.showSaveFilePicker) {
+                        let fileHandle = activeTab.fileHandle;
+                        if (!fileHandle) {
+                            fileHandle = await window.showSaveFilePicker({
+                                suggestedName: activeTab.name,
+                                types: [{ 
+                                    description: 'Code & Text Files', 
+                                    accept: { 
+                                        'text/plain': ['.txt'],
+                                        'text/x-python': ['.py'],
+                                        'application/x-sh': ['.sh'],
+                                        'text/javascript': ['.js'],
+                                        'text/html': ['.html'],
+                                        'application/json': ['.json']
+                                    } 
+                                }],
+                            });
+                        }
+                        const writable = await fileHandle.createWritable();
+                        await writable.write(activeTab.content);
+                        await writable.close();
+                        
+                        activeTab.name = fileHandle.name;
+                        activeTab.fileHandle = fileHandle;
+                        if (this.elements.activeFileDisplay) this.elements.activeFileDisplay.textContent = activeTab.name;
+                        this.renderTabs();
+                        this.updateSyntaxHighlighting(); // In case extension changed
+                        this.showToast(`Saved ${fileHandle.name}`, 'success');
+                    } else {
+                        let fileName = prompt("Enter file name (e.g. script.py):", activeTab.name);
+                        if (fileName === null) return; 
+                        
+                        if (fileName.trim() === '') fileName = 'untitled.txt';
+
+                        activeTab.name = fileName;
+                        if (this.elements.activeFileDisplay) this.elements.activeFileDisplay.textContent = activeTab.name;
+                        this.renderTabs();
+                        this.updateSyntaxHighlighting();
+
+                        const blob = new Blob([activeTab.content], { type: 'text/plain' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = activeTab.name;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                        
+                        this.showToast(`Downloaded ${activeTab.name}`, 'success');
+                    }
+                } catch (error) {
+                    if (error.name !== 'AbortError') {
+                        console.error('Save failed:', error);
+                        this.showToast('Failed to save file', 'error');
+                    }
+                }
+            },
+
+            // --- UI Utilities ---
+            showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                let bgColors = type === 'success' ? 'bg-primary' : 'bg-red-500';
+                
+                toast.className = `${bgColors} text-white px-4 py-3 rounded-lg shadow-xl text-sm font-medium flex items-center space-x-2 toast-animate`;
+                
+                const icon = type === 'success' 
+                    ? `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`
+                    : `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+
+                toast.innerHTML = `${icon}<span>${message}</span>`;
+                this.elements.toastContainer.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateY(100%)';
+                    toast.style.transition = 'all 0.3s ease-out';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+        };
+
+        // Boot the app
+        document.addEventListener('DOMContentLoaded', () => { app.init(); });
+
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                // Check if running on a supported protocol (http/https) to avoid sandbox/file errors
+                if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+                    navigator.serviceWorker.register('sw.js')
+                        .then(reg => console.log('Service Worker registered successfully'))
+                        .catch(err => console.warn('Service Worker registration skipped/failed:', err.message));
+                } else {
+                    console.log('Service Worker skipped: PWA installation requires a local/live web server (http/https).');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
