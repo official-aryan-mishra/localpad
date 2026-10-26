@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>LocalPad - Syntax Highlighting Editor</title>
     
-    <!-- PWA Manifest & Theme Color -->
+    <!-- Favicon & PWA Manifest -->
+    <link rel="icon" type="image/png" href="icon.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" id="meta-theme-color" content="#1e3a8a">
     
@@ -208,13 +209,21 @@
 <body class="bg-theme_bg text-theme_text h-screen w-screen flex flex-col overflow-hidden transition-colors duration-200 font-sans">
 
     <!-- Top Toolbar -->
-    <header class="h-14 md:h-16 flex-shrink-0 border-b border-theme_border bg-theme_toolbar flex items-center justify-between px-2 md:px-4 z-20 transition-colors duration-200 relative">
+    <header class="h-14 md:h-16 flex-shrink-0 border-b border-theme_border bg-theme_toolbar flex items-center justify-between px-2 md:px-4 z-20 transition-colors duration-200 relative titlebar-area">
         
         <div class="flex items-center space-x-1 md:space-x-3">
             <button onclick="app.toggleTabs()" class="p-2 rounded-lg hover:bg-theme_hover text-theme_text transition focus:outline-none">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
-            <h1 class="text-lg font-bold hidden sm:block mr-2">LocalPad</h1>
+            
+            <div class="hidden sm:flex items-center mr-2 space-x-2 select-none">
+                <h1 class="text-lg font-bold">LocalPad</h1>
+                <!-- Custom .txt Logo -->
+                <div class="flex items-center bg-[#252525] rounded-full px-2.5 py-1 text-sm font-bold font-mono shadow-inner border border-black/20">
+                    <span class="text-orange-500 text-base leading-none -mt-1">.</span>
+                    <span class="text-white leading-none tracking-wide">txt</span>
+                </div>
+            </div>
 
             <!-- Open / Save Controls -->
             <button onclick="app.handleFileOpenClick()" class="flex items-center space-x-1 px-3 py-1.5 md:py-2 bg-theme_hover hover:opacity-80 rounded-lg transition text-sm font-medium focus:outline-none">
