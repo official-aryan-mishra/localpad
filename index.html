@@ -185,8 +185,8 @@
         </div>
     </header>
 
-    <!-- CLASSIC HEADER (Desktop Only, Hidden by Default) -->
-    <header id="classic-header" class="hidden flex-col flex-shrink-0 border-b border-theme_border bg-theme_toolbar z-20 w-full relative">
+    <!-- CLASSIC HEADER (Fixed Z-Index from 20 to 50 to prevent dropdown clipping) -->
+    <header id="classic-header" class="hidden flex-col flex-shrink-0 border-b border-theme_border bg-theme_toolbar z-50 w-full relative">
         <!-- Menubar Row -->
         <div class="flex items-center px-3 py-1 space-x-2 text-sm border-b border-theme_border bg-theme_toolbar">
             <div class="flex items-baseline bg-[#222222] px-2 py-0.5 rounded-sm mr-4 shadow-sm border border-[#333333]">
@@ -196,7 +196,7 @@
             
             <div class="relative group">
                 <button class="px-2 py-0.5 hover:bg-theme_hover rounded focus:outline-none">File</button>
-                <div class="absolute left-0 top-full mt-0 w-48 bg-theme_toolbar border border-theme_border rounded shadow-xl hidden group-hover:block z-50 text-sm">
+                <div class="absolute left-0 top-full mt-0 w-48 bg-theme_toolbar border border-theme_border rounded shadow-xl hidden group-hover:block z-[60] text-sm">
                     <button onclick="app.addTab()" class="w-full text-left px-4 py-2 hover:bg-theme_hover flex justify-between"><span>New Tab</span><span class="opacity-50">Alt+N</span></button>
                     <button onclick="app.handleFileOpenClick()" class="w-full text-left px-4 py-2 hover:bg-theme_hover flex justify-between"><span>Open File...</span><span class="opacity-50">Ctrl+O</span></button>
                     <button onclick="app.saveFile()" class="w-full text-left px-4 py-2 hover:bg-theme_hover flex justify-between"><span>Save File</span><span class="opacity-50">Ctrl+S</span></button>
@@ -206,7 +206,7 @@
             </div>
             <div class="relative group">
                 <button class="px-2 py-0.5 hover:bg-theme_hover rounded focus:outline-none">Edit</button>
-                <div class="absolute left-0 top-full mt-0 w-48 bg-theme_toolbar border border-theme_border rounded shadow-xl hidden group-hover:block z-50 text-sm">
+                <div class="absolute left-0 top-full mt-0 w-48 bg-theme_toolbar border border-theme_border rounded shadow-xl hidden group-hover:block z-[60] text-sm">
                     <button onclick="app.undo()" class="w-full text-left px-4 py-2 hover:bg-theme_hover flex justify-between"><span>Undo</span><span class="opacity-50">Ctrl+Z</span></button>
                     <button onclick="app.redo()" class="w-full text-left px-4 py-2 hover:bg-theme_hover flex justify-between"><span>Redo</span><span class="opacity-50">Ctrl+Y</span></button>
                     <div class="border-t border-theme_border my-1"></div>
@@ -215,14 +215,14 @@
             </div>
             <div class="relative group">
                 <button class="px-2 py-0.5 hover:bg-theme_hover rounded focus:outline-none">View</button>
-                <div class="absolute left-0 top-full mt-0 w-48 bg-theme_toolbar border border-theme_border rounded shadow-xl hidden group-hover:block z-50 text-sm">
+                <div class="absolute left-0 top-full mt-0 w-48 bg-theme_toolbar border border-theme_border rounded shadow-xl hidden group-hover:block z-[60] text-sm">
                     <button onclick="app.changeFontSize(2)" class="w-full text-left px-4 py-2 hover:bg-theme_hover">Zoom In (Increase Font)</button>
                     <button onclick="app.changeFontSize(-2)" class="w-full text-left px-4 py-2 hover:bg-theme_hover">Zoom Out (Decrease Font)</button>
                 </div>
             </div>
             <div class="relative group">
                 <button class="px-2 py-0.5 hover:bg-theme_hover rounded focus:outline-none">Help</button>
-                <div class="absolute left-0 top-full mt-0 w-48 bg-theme_toolbar border border-theme_border rounded shadow-xl hidden group-hover:block z-50 text-sm">
+                <div class="absolute left-0 top-full mt-0 w-48 bg-theme_toolbar border border-theme_border rounded shadow-xl hidden group-hover:block z-[60] text-sm">
                     <button onclick="app.showShortcuts()" class="w-full text-left px-4 py-2 hover:bg-theme_hover">Keyboard Shortcuts</button>
                     <button onclick="app.toggleSettings()" class="w-full text-left px-4 py-2 hover:bg-theme_hover">Preferences / Settings</button>
                 </div>
@@ -234,6 +234,10 @@
         
         <!-- Toolbar Row -->
         <div class="flex items-center px-3 py-1.5 space-x-1 overflow-x-auto no-scrollbar bg-theme_bg">
+            <!-- ADDED TOGGLE FOR SIDEBAR IN CLASSIC MODE -->
+            <button onclick="app.toggleTabs()" class="p-1 hover:bg-theme_hover rounded transition text-theme_text opacity-80 hover:opacity-100" title="Toggle Sidebar Tabs"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
+            <div class="w-px h-5 bg-theme_border mx-1"></div>
+
             <button onclick="app.addTab()" class="p-1 hover:bg-theme_hover rounded transition text-theme_text opacity-80 hover:opacity-100" title="New Tab"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg></button>
             <button onclick="app.handleFileOpenClick()" class="p-1 hover:bg-theme_hover rounded transition text-theme_text opacity-80 hover:opacity-100" title="Open"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"></path></svg></button>
             <button onclick="app.saveFile()" class="p-1 hover:bg-theme_hover rounded transition text-theme_text opacity-80 hover:opacity-100" title="Save"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg></button>
@@ -573,7 +577,7 @@
                 this.applyLayout();
             },
             applyLayout() {
-                // Header UI Styles
+                // Header UI Styles - Now using z-50 on the classic header
                 const mod = this.elements.modernHeader;
                 const cls = this.elements.classicHeader;
                 
@@ -582,8 +586,8 @@
                 if (this.settings.uiStyle === 'classic') {
                     // Hide modern header strictly on md+ screens, forcing modern touch UI on mobile only
                     mod.className = `h-14 flex md:hidden ${modBase}`;
-                    // Show classic header strictly on md+ screens
-                    cls.className = "hidden md:flex flex-col flex-shrink-0 border-b border-theme_border bg-theme_toolbar z-20 w-full relative";
+                    // Show classic header strictly on md+ screens with fixed z-50
+                    cls.className = "hidden md:flex flex-col flex-shrink-0 border-b border-theme_border bg-theme_toolbar z-50 w-full relative";
                 } else {
                     // Show modern header everywhere
                     mod.className = `h-14 md:h-16 flex ${modBase}`;
