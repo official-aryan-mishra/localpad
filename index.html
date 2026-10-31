@@ -185,9 +185,9 @@
         </div>
     </header>
 
-    <!-- CLASSIC HEADER (Fixed Z-Index from 20 to 50 to prevent dropdown clipping) -->
+    <!-- CLASSIC HEADER -->
     <header id="classic-header" class="hidden flex-col flex-shrink-0 border-b border-theme_border bg-theme_toolbar z-50 w-full relative">
-        <!-- Menubar Row -->
+        <!-- Menubar Row (Filename removed from here) -->
         <div class="flex items-center px-3 py-1 space-x-2 text-sm border-b border-theme_border bg-theme_toolbar">
             <div class="flex items-baseline bg-[#222222] px-2 py-0.5 rounded-sm mr-4 shadow-sm border border-[#333333]">
                 <span class="text-[#ff6600] font-black text-xs leading-none">.</span>
@@ -227,26 +227,36 @@
                     <button onclick="app.toggleSettings()" class="w-full text-left px-4 py-2 hover:bg-theme_hover">Preferences / Settings</button>
                 </div>
             </div>
-
-            <!-- Classic Filename -->
-            <div class="ml-auto px-4 truncate text-sm font-semibold opacity-80" id="classic-file-display">untitled.txt</div>
         </div>
         
-        <!-- Toolbar Row -->
-        <div class="flex items-center px-3 py-1.5 space-x-1 overflow-x-auto no-scrollbar bg-theme_bg">
-            <!-- ADDED TOGGLE FOR SIDEBAR IN CLASSIC MODE -->
-            <button onclick="app.toggleTabs()" class="p-1 hover:bg-theme_hover rounded transition text-theme_text opacity-80 hover:opacity-100" title="Toggle Sidebar Tabs"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
-            <div class="w-px h-5 bg-theme_border mx-1"></div>
+        <!-- Toolbar Row (Redesigned per instructions) -->
+        <div class="flex items-center px-3 py-1.5 overflow-x-auto no-scrollbar bg-theme_bg relative w-full">
+            
+            <!-- Left Controls: Sidebar, Open, Save, Close, Undo, Redo -->
+            <div class="flex items-center space-x-1 flex-shrink-0">
+                <button onclick="app.toggleTabs()" class="p-1 hover:bg-theme_hover rounded transition text-theme_text opacity-80 hover:opacity-100" title="Toggle Sidebar Tabs"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
+                <div class="w-px h-5 bg-theme_border mx-1"></div>
 
-            <button onclick="app.addTab()" class="p-1 hover:bg-theme_hover rounded transition text-theme_text opacity-80 hover:opacity-100" title="New Tab"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg></button>
-            <button onclick="app.handleFileOpenClick()" class="p-1 hover:bg-theme_hover rounded transition text-theme_text opacity-80 hover:opacity-100" title="Open"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"></path></svg></button>
-            <button onclick="app.saveFile()" class="p-1 hover:bg-theme_hover rounded transition text-theme_text opacity-80 hover:opacity-100" title="Save"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg></button>
-            <div class="w-px h-5 bg-theme_border mx-1"></div>
-            <button onclick="app.undo()" class="p-1 hover:bg-theme_hover rounded transition text-theme_text opacity-80 hover:opacity-100" title="Undo"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg></button>
-            <button onclick="app.redo()" class="p-1 hover:bg-theme_hover rounded transition text-theme_text opacity-80 hover:opacity-100" title="Redo"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6"></path></svg></button>
-            <div class="w-px h-5 bg-theme_border mx-1"></div>
-            <button onclick="app.toggleFindReplace()" class="p-1 hover:bg-theme_hover rounded transition text-theme_text opacity-80 hover:opacity-100" title="Find/Replace"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></button>
-            <button onclick="app.toggleSettings()" class="p-1 hover:bg-theme_hover rounded transition text-theme_text opacity-80 hover:opacity-100" title="Settings"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+                <button onclick="app.handleFileOpenClick()" class="p-1 hover:bg-theme_hover rounded transition text-theme_text opacity-80 hover:opacity-100" title="Open"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"></path></svg></button>
+                <button onclick="app.saveFile()" class="p-1 hover:bg-theme_hover rounded transition text-theme_text opacity-80 hover:opacity-100" title="Save"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg></button>
+                <button onclick="if(app.activeTabId) app.closeTab(app.activeTabId, event)" class="p-1 hover:bg-theme_hover rounded transition text-theme_text opacity-80 hover:opacity-100 text-red-500 hover:text-red-600" title="Close Tab"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                
+                <div class="w-px h-5 bg-theme_border mx-1"></div>
+                <button onclick="app.undo()" class="p-1 hover:bg-theme_hover rounded transition text-theme_text opacity-80 hover:opacity-100" title="Undo"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg></button>
+                <button onclick="app.redo()" class="p-1 hover:bg-theme_hover rounded transition text-theme_text opacity-80 hover:opacity-100" title="Redo"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6"></path></svg></button>
+            </div>
+
+            <!-- Centered Filename -->
+            <div class="absolute left-1/2 transform -translate-x-1/2 flex items-center justify-center pointer-events-none truncate px-4 max-w-[150px] sm:max-w-xs md:max-w-md">
+                <span id="classic-file-display" class="text-sm font-semibold opacity-80 truncate text-theme_text">untitled.txt</span>
+            </div>
+
+            <!-- Right Controls: Find, Settings -->
+            <div class="ml-auto flex items-center space-x-1 flex-shrink-0">
+                <button onclick="app.toggleFindReplace()" class="p-1 hover:bg-theme_hover rounded transition text-theme_text opacity-80 hover:opacity-100" title="Find/Replace"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></button>
+                <button onclick="app.toggleSettings()" class="p-1 hover:bg-theme_hover rounded transition text-theme_text opacity-80 hover:opacity-100" title="Settings"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+            </div>
+            
         </div>
     </header>
 
@@ -577,7 +587,7 @@
                 this.applyLayout();
             },
             applyLayout() {
-                // Header UI Styles - Now using z-50 on the classic header
+                // Header UI Styles
                 const mod = this.elements.modernHeader;
                 const cls = this.elements.classicHeader;
                 
@@ -586,7 +596,7 @@
                 if (this.settings.uiStyle === 'classic') {
                     // Hide modern header strictly on md+ screens, forcing modern touch UI on mobile only
                     mod.className = `h-14 flex md:hidden ${modBase}`;
-                    // Show classic header strictly on md+ screens with fixed z-50
+                    // Show classic header strictly on md+ screens
                     cls.className = "hidden md:flex flex-col flex-shrink-0 border-b border-theme_border bg-theme_toolbar z-50 w-full relative";
                 } else {
                     // Show modern header everywhere
