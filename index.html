@@ -47,7 +47,6 @@
             --border: #e2e8f0;
             --hover: #f1f5f9;
             --input-bg: #ffffff;
-            /* Prism Light Syntax */
             --prism-keyword: #0000ff;
             --prism-string: #a31515;
             --prism-number: #098658;
@@ -61,7 +60,6 @@
             --border: #bae6fd;
             --hover: #bae6fd;
             --input-bg: #ffffff;
-            /* Prism Light Syntax */
             --prism-keyword: #0284c7;
             --prism-string: #b91c1c;
             --prism-number: #047857;
@@ -75,7 +73,6 @@
             --border: #262626;
             --hover: #1f1f1f;
             --input-bg: #111111;
-            /* Prism Dark Syntax */
             --prism-keyword: #569cd6;
             --prism-string: #ce9178;
             --prism-number: #b5cea8;
@@ -89,7 +86,6 @@
             --border: #312e81;
             --hover: #3730a3;
             --input-bg: #1e3a8a;
-            /* Prism Dark Syntax */
             --prism-keyword: #60a5fa;
             --prism-string: #fca5a5;
             --prism-number: #6ee7b7;
@@ -97,7 +93,6 @@
             --prism-function: #fde047;
         }
 
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
@@ -106,13 +101,7 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Editor synchronization essentials */
-        .editor-workspace {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-            position: relative;
-        }
+        .editor-workspace { display: flex; flex: 1; overflow: hidden; position: relative; }
 
         #line-numbers {
             box-sizing: border-box;
@@ -126,64 +115,20 @@
             opacity: 0.7;
         }
 
-        /* OVERLAY EDITOR ARCHITECTURE */
-        #editor-container {
-            position: relative;
-            flex: 1;
-            overflow: hidden;
-            background: transparent;
-        }
+        #editor-container { position: relative; flex: 1; overflow: hidden; background: transparent; }
 
         #editor, #syntax-pre {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 1rem;
-            box-sizing: border-box;
-            border: none;
-            font-family: 'Courier New', Courier, monospace;
-            tab-size: 4;
-            -moz-tab-size: 4;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; margin: 0; padding: 1rem;
+            box-sizing: border-box; border: none; font-family: 'Courier New', Courier, monospace; tab-size: 4; -moz-tab-size: 4;
         }
 
-        #editor {
-            color: transparent; 
-            background: transparent;
-            caret-color: var(--text);
-            z-index: 2;
-            resize: none;
-            outline: none;
-            overflow: auto;
-        }
+        #editor { color: transparent; background: transparent; caret-color: var(--text); z-index: 2; resize: none; outline: none; overflow: auto; }
+        #syntax-pre { z-index: 1; pointer-events: none; overflow: hidden; color: var(--text); }
+        #editor::selection { background-color: rgba(99, 102, 241, 0.4); color: transparent; }
 
-        #syntax-pre {
-            z-index: 1;
-            pointer-events: none;
-            overflow: hidden; 
-            color: var(--text); 
-        }
+        .wrap-enabled { white-space: pre-wrap !important; word-break: break-word !important; overflow-wrap: break-word !important; }
+        .wrap-disabled { white-space: pre !important; word-break: normal !important; overflow-wrap: normal !important; }
 
-        #editor::selection {
-            background-color: rgba(99, 102, 241, 0.4);
-            color: transparent;
-        }
-
-        /* Word Wrap Control Classes */
-        .wrap-enabled {
-            white-space: pre-wrap !important;
-            word-break: break-word !important;
-            overflow-wrap: break-word !important;
-        }
-        .wrap-disabled {
-            white-space: pre !important;
-            word-break: normal !important;
-            overflow-wrap: normal !important;
-        }
-
-        /* Dynamic PrismJS Theme Tokens */
         .token.comment, .token.prolog, .token.doctype, .token.cdata { color: var(--prism-comment); }
         .token.punctuation { color: var(--text); opacity: 0.7; }
         .token.property, .token.tag, .token.boolean, .token.number, .token.constant, .token.symbol, .token.deleted { color: var(--prism-number); }
@@ -193,28 +138,23 @@
         .token.function, .token.class-name { color: var(--prism-function); }
         .token.regex, .token.important, .token.variable { color: var(--prism-keyword); }
 
-        /* Animations */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .modal-animate { animation: fadeIn 0.2s ease-out forwards; }
         @keyframes slideInUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .toast-animate { animation: slideInUp 0.3s ease-out forwards; }
         
-        /* Custom toggle switch */
         input:checked ~ .toggle-bg { background-color: #4f46e5; }
         input:checked ~ .toggle-dot { transform: translateX(100%); }
     </style>
 </head>
 <body class="bg-theme_bg text-theme_text h-screen w-screen flex flex-col overflow-hidden transition-colors duration-200 font-sans">
 
-    <!-- Top Toolbar -->
-    <header class="h-14 md:h-16 flex-shrink-0 border-b border-theme_border bg-theme_toolbar flex items-center justify-between overflow-x-auto no-scrollbar px-2 md:px-4 z-20 transition-colors duration-200 relative w-full gap-1 md:gap-2">
-        
+    <!-- MODERN HEADER -->
+    <header id="modern-header" class="h-14 md:h-16 flex flex-shrink-0 border-b border-theme_border bg-theme_toolbar items-center justify-between overflow-x-auto no-scrollbar px-2 md:px-4 z-20 transition-colors duration-200 relative w-full gap-1 md:gap-2">
         <div class="flex items-center space-x-1 md:space-x-3 flex-shrink-0">
             <button onclick="app.toggleTabs()" class="p-1.5 md:p-2 rounded-lg hover:bg-theme_hover text-theme_text transition focus:outline-none">
                 <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
-            
-            <!-- Logo & Pill -->
             <div class="flex items-center mr-1 md:mr-2">
                 <h1 class="hidden sm:block text-lg font-bold tracking-wide">LocalPad</h1>
                 <div class="flex items-baseline bg-[#222222] px-2 py-0.5 sm:px-3 sm:py-1 rounded-full ml-1 sm:ml-2 shadow-sm border border-[#333333]">
@@ -222,52 +162,92 @@
                     <span class="text-white font-bold text-xs sm:text-sm leading-none tracking-wider ml-[1px]">txt</span>
                 </div>
             </div>
-
-            <!-- Open / Save Controls -->
             <button onclick="app.handleFileOpenClick()" class="flex items-center space-x-1 p-1.5 md:px-3 md:py-2 bg-theme_hover hover:opacity-80 rounded-lg transition text-sm font-medium focus:outline-none" title="Open (Ctrl+O)">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"></path></svg>
                 <span class="hidden lg:inline">Open</span>
             </button>
             <input type="file" id="file-input" class="hidden" accept=".txt,.py,.sh,.js,.html,.json" onchange="app.handleFileFallback(event)">
-
             <button onclick="app.saveFile()" class="flex items-center space-x-1 p-1.5 md:px-3 md:py-2 bg-primary hover:bg-primary_hover text-white rounded-lg transition text-sm font-medium shadow-sm focus:outline-none" title="Save (Ctrl+S)">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
                 <span class="hidden lg:inline">Save</span>
             </button>
         </div>
-
-        <!-- Active File Display (Center) -->
         <div class="absolute left-1/2 transform -translate-x-1/2 hidden md:flex items-center justify-center pointer-events-none truncate px-4 w-48 justify-center">
             <span id="active-file-display" class="text-sm font-semibold opacity-80 truncate text-theme_text">untitled.txt</span>
         </div>
-
         <div class="flex items-center space-x-0.5 md:space-x-2 flex-shrink-0 ml-auto">
-            <!-- Undo / Redo -->
             <div class="flex items-center border-r border-theme_border pr-1 mr-1 md:pr-2 md:mr-2">
-                <button onclick="app.undo()" class="p-1.5 hover:bg-theme_hover rounded-lg transition focus:outline-none" title="Undo (Ctrl+Z)">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
-                </button>
-                <button onclick="app.redo()" class="p-1.5 hover:bg-theme_hover rounded-lg transition focus:outline-none" title="Redo (Ctrl+Y)">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6"></path></svg>
-                </button>
+                <button onclick="app.undo()" class="p-1.5 hover:bg-theme_hover rounded-lg transition focus:outline-none" title="Undo (Ctrl+Z)"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg></button>
+                <button onclick="app.redo()" class="p-1.5 hover:bg-theme_hover rounded-lg transition focus:outline-none" title="Redo (Ctrl+Y)"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6"></path></svg></button>
+            </div>
+            <button onclick="app.toggleFindReplace()" class="p-1.5 hover:bg-theme_hover rounded-lg transition focus:outline-none" title="Find/Replace (Ctrl+F)"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></button>
+            <button onclick="app.toggleSettings()" class="p-1.5 hover:bg-theme_hover rounded-lg transition focus:outline-none" title="Settings"><svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+        </div>
+    </header>
+
+    <!-- CLASSIC HEADER (Desktop Only, Hidden by Default) -->
+    <header id="classic-header" class="hidden flex-col flex-shrink-0 border-b border-theme_border bg-theme_toolbar z-20 w-full relative">
+        <!-- Menubar Row -->
+        <div class="flex items-center px-3 py-1 space-x-2 text-sm border-b border-theme_border bg-theme_toolbar">
+            <div class="flex items-baseline bg-[#222222] px-2 py-0.5 rounded-sm mr-4 shadow-sm border border-[#333333]">
+                <span class="text-[#ff6600] font-black text-xs leading-none">.</span>
+                <span class="text-white font-bold text-[10px] leading-none tracking-wider ml-[1px]">txt</span>
+            </div>
+            
+            <div class="relative group">
+                <button class="px-2 py-0.5 hover:bg-theme_hover rounded focus:outline-none">File</button>
+                <div class="absolute left-0 top-full mt-0 w-48 bg-theme_toolbar border border-theme_border rounded shadow-xl hidden group-hover:block z-50 text-sm">
+                    <button onclick="app.addTab()" class="w-full text-left px-4 py-2 hover:bg-theme_hover flex justify-between"><span>New Tab</span><span class="opacity-50">Alt+N</span></button>
+                    <button onclick="app.handleFileOpenClick()" class="w-full text-left px-4 py-2 hover:bg-theme_hover flex justify-between"><span>Open File...</span><span class="opacity-50">Ctrl+O</span></button>
+                    <button onclick="app.saveFile()" class="w-full text-left px-4 py-2 hover:bg-theme_hover flex justify-between"><span>Save File</span><span class="opacity-50">Ctrl+S</span></button>
+                    <div class="border-t border-theme_border my-1"></div>
+                    <button onclick="if(app.activeTabId) app.closeTab(app.activeTabId, event)" class="w-full text-left px-4 py-2 hover:bg-theme_hover flex justify-between"><span>Close Tab</span><span class="opacity-50">Alt+W</span></button>
+                </div>
+            </div>
+            <div class="relative group">
+                <button class="px-2 py-0.5 hover:bg-theme_hover rounded focus:outline-none">Edit</button>
+                <div class="absolute left-0 top-full mt-0 w-48 bg-theme_toolbar border border-theme_border rounded shadow-xl hidden group-hover:block z-50 text-sm">
+                    <button onclick="app.undo()" class="w-full text-left px-4 py-2 hover:bg-theme_hover flex justify-between"><span>Undo</span><span class="opacity-50">Ctrl+Z</span></button>
+                    <button onclick="app.redo()" class="w-full text-left px-4 py-2 hover:bg-theme_hover flex justify-between"><span>Redo</span><span class="opacity-50">Ctrl+Y</span></button>
+                    <div class="border-t border-theme_border my-1"></div>
+                    <button onclick="app.toggleFindReplace()" class="w-full text-left px-4 py-2 hover:bg-theme_hover flex justify-between"><span>Find/Replace</span><span class="opacity-50">Ctrl+F</span></button>
+                </div>
+            </div>
+            <div class="relative group">
+                <button class="px-2 py-0.5 hover:bg-theme_hover rounded focus:outline-none">View</button>
+                <div class="absolute left-0 top-full mt-0 w-48 bg-theme_toolbar border border-theme_border rounded shadow-xl hidden group-hover:block z-50 text-sm">
+                    <button onclick="app.changeFontSize(2)" class="w-full text-left px-4 py-2 hover:bg-theme_hover">Zoom In (Increase Font)</button>
+                    <button onclick="app.changeFontSize(-2)" class="w-full text-left px-4 py-2 hover:bg-theme_hover">Zoom Out (Decrease Font)</button>
+                </div>
+            </div>
+            <div class="relative group">
+                <button class="px-2 py-0.5 hover:bg-theme_hover rounded focus:outline-none">Help</button>
+                <div class="absolute left-0 top-full mt-0 w-48 bg-theme_toolbar border border-theme_border rounded shadow-xl hidden group-hover:block z-50 text-sm">
+                    <button onclick="app.showShortcuts()" class="w-full text-left px-4 py-2 hover:bg-theme_hover">Keyboard Shortcuts</button>
+                    <button onclick="app.toggleSettings()" class="w-full text-left px-4 py-2 hover:bg-theme_hover">Preferences / Settings</button>
+                </div>
             </div>
 
-            <!-- Find & Replace Button -->
-            <button onclick="app.toggleFindReplace()" class="p-1.5 hover:bg-theme_hover rounded-lg transition focus:outline-none" title="Find and Replace">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-            </button>
-
-            <!-- Settings Button -->
-            <button onclick="app.toggleSettings()" class="p-1.5 hover:bg-theme_hover rounded-lg transition focus:outline-none" title="Settings">
-                <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-            </button>
+            <!-- Classic Filename -->
+            <div class="ml-auto px-4 truncate text-sm font-semibold opacity-80" id="classic-file-display">untitled.txt</div>
+        </div>
+        
+        <!-- Toolbar Row -->
+        <div class="flex items-center px-3 py-1.5 space-x-1 overflow-x-auto no-scrollbar bg-theme_bg">
+            <button onclick="app.addTab()" class="p-1 hover:bg-theme_hover rounded transition text-theme_text opacity-80 hover:opacity-100" title="New Tab"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg></button>
+            <button onclick="app.handleFileOpenClick()" class="p-1 hover:bg-theme_hover rounded transition text-theme_text opacity-80 hover:opacity-100" title="Open"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"></path></svg></button>
+            <button onclick="app.saveFile()" class="p-1 hover:bg-theme_hover rounded transition text-theme_text opacity-80 hover:opacity-100" title="Save"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg></button>
+            <div class="w-px h-5 bg-theme_border mx-1"></div>
+            <button onclick="app.undo()" class="p-1 hover:bg-theme_hover rounded transition text-theme_text opacity-80 hover:opacity-100" title="Undo"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg></button>
+            <button onclick="app.redo()" class="p-1 hover:bg-theme_hover rounded transition text-theme_text opacity-80 hover:opacity-100" title="Redo"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6"></path></svg></button>
+            <div class="w-px h-5 bg-theme_border mx-1"></div>
+            <button onclick="app.toggleFindReplace()" class="p-1 hover:bg-theme_hover rounded transition text-theme_text opacity-80 hover:opacity-100" title="Find/Replace"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></button>
+            <button onclick="app.toggleSettings()" class="p-1 hover:bg-theme_hover rounded transition text-theme_text opacity-80 hover:opacity-100" title="Settings"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
         </div>
     </header>
 
     <!-- Main Workspace Area -->
     <div id="workspace-container" class="flex flex-1 overflow-hidden relative">
-        
-        <!-- Sidebar Overlay (Mobile) -->
         <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden" onclick="app.toggleTabs()"></div>
 
         <!-- Adaptive Tab Bar -->
@@ -278,9 +258,8 @@
             transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out
             flex flex-col flex-shrink-0
         ">
-            <!-- Mobile Header for Drawer -->
+            <!-- Sidebar Header with Logo -->
             <div class="p-4 flex items-center justify-between border-b border-theme_border md:hidden sticky top-0 bg-theme_toolbar z-10 flex-shrink-0">
-                <!-- Replaced "Open Files" with Logo -->
                 <div class="flex items-center">
                     <h1 class="text-lg font-bold tracking-wide">LocalPad</h1>
                     <div class="flex items-baseline bg-[#222222] px-2 py-0.5 rounded-full ml-2 shadow-sm border border-[#333333]">
@@ -376,7 +355,7 @@
                     </div>
                 </label>
 
-                <!-- Font Size Moved to Settings -->
+                <!-- Font Size Controller inside Settings -->
                 <div class="flex items-center justify-between">
                     <span class="font-medium text-theme_text">Font Size</span>
                     <div class="flex items-center bg-theme_input border border-theme_border p-1 rounded-lg">
@@ -400,12 +379,23 @@
                     </select>
                 </div>
 
-                <div class="hidden md:flex flex-col space-y-2">
-                    <label class="font-medium text-theme_text">Desktop Tab Layout</label>
-                    <select id="setting-tab-layout" class="bg-theme_input border border-theme_border text-theme_text text-sm rounded-lg block w-full p-2.5 outline-none focus:ring-2 focus:ring-primary" onchange="app.updateSettings()">
-                        <option value="horizontal">Horizontal (Top)</option>
-                        <option value="vertical">Vertical (Left)</option>
-                    </select>
+                <!-- Desktop Layout Controls -->
+                <div class="hidden md:grid grid-cols-2 gap-4">
+                    <div class="flex flex-col space-y-2">
+                        <label class="font-medium text-theme_text">App UI Style</label>
+                        <select id="setting-ui-style" class="bg-theme_input border border-theme_border text-theme_text text-sm rounded-lg block w-full p-2.5 outline-none focus:ring-2 focus:ring-primary" onchange="app.updateSettings()">
+                            <option value="modern">Modern (Default)</option>
+                            <option value="classic">Classic (Menubar)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex flex-col space-y-2">
+                        <label class="font-medium text-theme_text">Tabs Layout</label>
+                        <select id="setting-tab-layout" class="bg-theme_input border border-theme_border text-theme_text text-sm rounded-lg block w-full p-2.5 outline-none focus:ring-2 focus:ring-primary" onchange="app.updateSettings()">
+                            <option value="horizontal">Top Horizontal</option>
+                            <option value="vertical">Left Vertical</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="pt-4 border-t border-theme_border flex justify-center">
@@ -454,10 +444,13 @@
                 wordWrap: false,
                 theme: 'dark-blue',
                 fontSize: 16,
-                tabLayout: 'horizontal'
+                tabLayout: 'horizontal',
+                uiStyle: 'modern' // 'modern' or 'classic'
             },
             
             elements: {
+                modernHeader: document.getElementById('modern-header'),
+                classicHeader: document.getElementById('classic-header'),
                 workspaceContainer: document.getElementById('workspace-container'),
                 tabsContainer: document.getElementById('tabs-container'),
                 sidebarOverlay: document.getElementById('sidebar-overlay'),
@@ -471,11 +464,13 @@
                 shortcutsModal: document.getElementById('shortcuts-modal'),
                 toastContainer: document.getElementById('toast-container'),
                 activeFileDisplay: document.getElementById('active-file-display'),
+                classicFileDisplay: document.getElementById('classic-file-display'),
                 
                 toggleLineNum: document.getElementById('setting-line-numbers'),
                 toggleWordWrap: document.getElementById('setting-word-wrap'),
                 selectTheme: document.getElementById('setting-theme'),
                 selectTabLayout: document.getElementById('setting-tab-layout'),
+                selectUIStyle: document.getElementById('setting-ui-style'),
 
                 findPanel: document.getElementById('find-replace-panel'),
                 findInput: document.getElementById('find-input'),
@@ -498,14 +493,7 @@
             // --- Syntax Highlighting Logic ---
             detectLanguage(filename) {
                 const ext = filename.split('.').pop().toLowerCase();
-                const map = {
-                    'py': 'python',
-                    'sh': 'bash',
-                    'js': 'javascript',
-                    'html': 'markup',
-                    'json': 'json',
-                    'txt': 'none'
-                };
+                const map = { 'py': 'python', 'sh': 'bash', 'js': 'javascript', 'html': 'markup', 'json': 'json', 'txt': 'none' };
                 return map[ext] || 'none';
             },
 
@@ -519,9 +507,7 @@
                 this.elements.syntaxCode.className = `language-${lang}`;
                 this.elements.syntaxCode.textContent = text;
                 
-                if (Prism.languages[lang]) {
-                    Prism.highlightElement(this.elements.syntaxCode);
-                }
+                if (Prism.languages[lang]) Prism.highlightElement(this.elements.syntaxCode);
             },
 
             handleKeyDown(e) {
@@ -553,6 +539,7 @@
                 this.settings.wordWrap = this.elements.toggleWordWrap.checked;
                 this.settings.theme = this.elements.selectTheme.value;
                 this.settings.tabLayout = this.elements.selectTabLayout.value;
+                this.settings.uiStyle = this.elements.selectUIStyle.value;
                 this.saveSettings();
                 this.applySettingsToUI();
             },
@@ -561,6 +548,7 @@
                 this.elements.toggleWordWrap.checked = this.settings.wordWrap;
                 this.elements.selectTheme.value = this.settings.theme;
                 this.elements.selectTabLayout.value = this.settings.tabLayout;
+                this.elements.selectUIStyle.value = this.settings.uiStyle;
 
                 document.documentElement.setAttribute('data-theme', this.settings.theme);
 
@@ -570,29 +558,39 @@
                 [this.elements.editor, this.elements.syntaxPre].forEach(el => {
                     el.style.fontSize = fontStr;
                     el.style.lineHeight = this.lineHeight;
-                    
                     if (this.settings.wordWrap) {
-                        el.classList.add('wrap-enabled');
-                        el.classList.remove('wrap-disabled');
+                        el.classList.add('wrap-enabled'); el.classList.remove('wrap-disabled');
                     } else {
-                        el.classList.add('wrap-disabled');
-                        el.classList.remove('wrap-enabled');
+                        el.classList.add('wrap-disabled'); el.classList.remove('wrap-enabled');
                     }
                 });
 
                 this.elements.lineNumbers.style.fontSize = fontStr;
                 this.elements.lineNumbers.style.lineHeight = this.lineHeight;
-
-                if (this.settings.showLineNumbers) {
-                    this.elements.lineNumbers.style.display = 'block';
-                    this.updateLineNumbers();
-                } else {
-                    this.elements.lineNumbers.style.display = 'none';
-                }
+                this.elements.lineNumbers.style.display = this.settings.showLineNumbers ? 'block' : 'none';
+                if(this.settings.showLineNumbers) this.updateLineNumbers();
 
                 this.applyLayout();
             },
             applyLayout() {
+                // Header UI Styles
+                const mod = this.elements.modernHeader;
+                const cls = this.elements.classicHeader;
+                
+                const modBase = "flex-shrink-0 border-b border-theme_border bg-theme_toolbar items-center justify-between overflow-x-auto no-scrollbar px-2 md:px-4 z-20 transition-colors duration-200 relative w-full gap-1 md:gap-2";
+                
+                if (this.settings.uiStyle === 'classic') {
+                    // Hide modern header strictly on md+ screens, forcing modern touch UI on mobile only
+                    mod.className = `h-14 flex md:hidden ${modBase}`;
+                    // Show classic header strictly on md+ screens
+                    cls.className = "hidden md:flex flex-col flex-shrink-0 border-b border-theme_border bg-theme_toolbar z-20 w-full relative";
+                } else {
+                    // Show modern header everywhere
+                    mod.className = `h-14 md:h-16 flex ${modBase}`;
+                    cls.className = "hidden";
+                }
+
+                // Workspace Tab Layouts
                 const workspace = this.elements.workspaceContainer;
                 const tabs = this.elements.tabsContainer;
                 const tabsList = this.elements.tabsList;
@@ -643,7 +641,6 @@
 
                 let startPos = this.elements.editor.selectionEnd;
                 let idx = text.indexOf(search, startPos);
-                
                 if (idx === -1) idx = text.indexOf(search, 0);
 
                 if (idx !== -1) {
@@ -693,11 +690,9 @@
                 
                 if (window.innerWidth < 768) {
                     if (container.classList.contains('-translate-x-full')) {
-                        container.classList.remove('-translate-x-full');
-                        overlay.classList.remove('hidden');
+                        container.classList.remove('-translate-x-full'); overlay.classList.remove('hidden');
                     } else {
-                        container.classList.add('-translate-x-full');
-                        overlay.classList.add('hidden');
+                        container.classList.add('-translate-x-full'); overlay.classList.add('hidden');
                     }
                 } else {
                     container.classList.toggle('md:hidden');
@@ -721,6 +716,7 @@
                 if (activeTab) {
                     this.elements.editor.value = activeTab.content;
                     if (this.elements.activeFileDisplay) this.elements.activeFileDisplay.textContent = activeTab.name;
+                    if (this.elements.classicFileDisplay) this.elements.classicFileDisplay.textContent = activeTab.name;
                     this.renderTabs();
                     this.updateSyntaxHighlighting();
                     if (this.settings.showLineNumbers) this.updateLineNumbers();
@@ -773,14 +769,8 @@
             },
 
             // --- Editor Mechanics ---
-            undo() {
-                this.elements.editor.focus();
-                document.execCommand('undo');
-            },
-            redo() {
-                this.elements.editor.focus();
-                document.execCommand('redo');
-            },
+            undo() { this.elements.editor.focus(); document.execCommand('undo'); },
+            redo() { this.elements.editor.focus(); document.execCommand('redo'); },
             showShortcuts() {
                 this.elements.settingsModal.classList.add('hidden');
                 this.elements.shortcutsModal.classList.remove('hidden');
@@ -809,7 +799,6 @@
             onEditorInput() {
                 const activeTab = this.tabs.find(t => t.id === this.activeTabId);
                 if (activeTab) activeTab.content = this.elements.editor.value;
-                
                 this.updateSyntaxHighlighting();
                 if (this.settings.showLineNumbers) this.updateLineNumbers();
             },
@@ -822,11 +811,7 @@
             syncScroll() {
                 const scrollTop = this.elements.editor.scrollTop;
                 const scrollLeft = this.elements.editor.scrollLeft;
-
-                if (this.settings.showLineNumbers) {
-                    this.elements.lineNumbers.scrollTop = scrollTop;
-                }
-                
+                if (this.settings.showLineNumbers) this.elements.lineNumbers.scrollTop = scrollTop;
                 this.elements.syntaxPre.scrollTop = scrollTop;
                 this.elements.syntaxPre.scrollLeft = scrollLeft;
             },
@@ -838,14 +823,7 @@
                         const [fileHandle] = await window.showOpenFilePicker({
                             types: [{ 
                                 description: 'Code & Text Files', 
-                                accept: { 
-                                    'text/plain': ['.txt'],
-                                    'text/x-python': ['.py'],
-                                    'application/x-sh': ['.sh'],
-                                    'text/javascript': ['.js'],
-                                    'text/html': ['.html'],
-                                    'application/json': ['.json']
-                                } 
+                                accept: { 'text/plain': ['.txt'], 'text/x-python': ['.py'], 'application/x-sh': ['.sh'], 'text/javascript': ['.js'], 'text/html': ['.html'], 'application/json': ['.json'] } 
                             }],
                         });
                         const file = await fileHandle.getFile();
@@ -887,14 +865,7 @@
                                 suggestedName: activeTab.name,
                                 types: [{ 
                                     description: 'Code & Text Files', 
-                                    accept: { 
-                                        'text/plain': ['.txt'],
-                                        'text/x-python': ['.py'],
-                                        'application/x-sh': ['.sh'],
-                                        'text/javascript': ['.js'],
-                                        'text/html': ['.html'],
-                                        'application/json': ['.json']
-                                    } 
+                                    accept: { 'text/plain': ['.txt'], 'text/x-python': ['.py'], 'application/x-sh': ['.sh'], 'text/javascript': ['.js'], 'text/html': ['.html'], 'application/json': ['.json'] } 
                                 }],
                             });
                         }
@@ -905,6 +876,7 @@
                         activeTab.name = fileHandle.name;
                         activeTab.fileHandle = fileHandle;
                         if (this.elements.activeFileDisplay) this.elements.activeFileDisplay.textContent = activeTab.name;
+                        if (this.elements.classicFileDisplay) this.elements.classicFileDisplay.textContent = activeTab.name;
                         this.renderTabs();
                         this.updateSyntaxHighlighting();
                         this.showToast(`Saved ${fileHandle.name}`, 'success');
@@ -916,6 +888,7 @@
 
                         activeTab.name = fileName;
                         if (this.elements.activeFileDisplay) this.elements.activeFileDisplay.textContent = activeTab.name;
+                        if (this.elements.classicFileDisplay) this.elements.classicFileDisplay.textContent = activeTab.name;
                         this.renderTabs();
                         this.updateSyntaxHighlighting();
 
@@ -939,7 +912,6 @@
                 }
             },
 
-            // --- UI Utilities ---
             showToast(message, type = 'success') {
                 const toast = document.createElement('div');
                 let bgColors = type === 'success' ? 'bg-primary' : 'bg-red-500';
