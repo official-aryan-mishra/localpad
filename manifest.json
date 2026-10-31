@@ -1,5 +1,5 @@
 {
-  "name": "LocalPad",
+  "name": "LocalPad Text Editor",
   "short_name": "LocalPad",
   "start_url": "./index.html",
   "display": "standalone",
