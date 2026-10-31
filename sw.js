@@ -5,9 +5,8 @@ const ASSETS_TO_CACHE = [
     './icon.png'
 ];
 
-// Install Event: Cache essential files
+// Install Event: Cache essential files and force update
 self.addEventListener('install', (event) => {
-    // Force the new service worker to activate immediately
     self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
@@ -16,7 +15,7 @@ self.addEventListener('install', (event) => {
     );
 });
 
-// Activate Event: Clean up old caches (this fixes the stuck icon issue!)
+// Activate Event: Delete old caches (Fixes the stuck icon issue)
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((cacheNames) => {
